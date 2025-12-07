@@ -14,3 +14,5 @@ env/
 # Keep model files for faster deployment
 # (Remove these lines if model > 100MB)
 # *.pkl
+
+.streamlit/secrets.toml
