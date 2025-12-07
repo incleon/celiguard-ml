@@ -1,24 +1,16 @@
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.pyc
 venv/
 env/
-ENV/
-
-# Model files (optional - see note below)
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # OS
 .DS_Store
-Thumbs.db
 
-# Streamlit
-.streamlit/secrets.toml
+# Keep model files for faster deployment
+# (Remove these lines if model > 100MB)
+# *.pkl
