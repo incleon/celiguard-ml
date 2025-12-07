@@ -7,6 +7,7 @@ User interface for predicting malignancy risk in Celiac Disease patients.
 import streamlit as st
 import requests
 import json
+import os
 
 # PAGE CONFIGURATION
 st.set_page_config(
@@ -17,7 +18,7 @@ st.set_page_config(
 
 
 # API CONFIGURATION
-API_URL = "http://localhost:8000"
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 
 # HELPER FUNCTIONS
