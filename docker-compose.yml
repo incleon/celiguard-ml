@@ -17,16 +17,16 @@ services:
   # Backend API service
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: celiguard-backend
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/app/../models
+      - ./models:/app/models
     environment:
-      - MODEL_PATH=/app/../models/celiac_risk_model.pkl
-      - METADATA_PATH=/app/../models/model_metadata.pkl
+      - MODEL_PATH=/app/models/celiac_risk_model.pkl
+      - METADATA_PATH=/app/models/model_metadata.pkl
     # depends_on:
     #   - train
     networks:
@@ -36,8 +36,8 @@ services:
   # Frontend service
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: celiguard-frontend
     ports:
       - "8501:8501"
