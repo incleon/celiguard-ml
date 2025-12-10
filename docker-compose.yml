@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Training service - runs once to generate the model
+  train:
+    build:
+      context: ./train
+      dockerfile: Dockerfile
+    container_name: celiguard-train
+    volumes:
+      - ./models:/app/../models
+    environment:
+      - MODEL_OUTPUT_DIR=/app/../models
+      - FORCE_TRAIN=${FORCE_TRAIN:-false}
+    networks:
+      - celiguard-network
+
+  # Backend API service - runs as a daemon
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: celiguard-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+    environment:
+      - MODEL_PATH=/app/models/celiac_risk_model.pkl
+      - METADATA_PATH=/app/models/model_metadata.pkl
+    depends_on:
+      - train
+    networks:
+      - celiguard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Frontend service - runs as a daemon 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: celiguard-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - celiguard-network
+    restart: unless-stopped
+
+networks:
+  celiguard-network:
+    driver: bridge
+
+volumes:
+  models:

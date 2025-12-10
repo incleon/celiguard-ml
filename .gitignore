@@ -1,18 +1,45 @@
 # Python
 __pycache__/
-*.pyc
-venv/
+*.py[cod]
+*$py.class
+*.so
+.Python
 env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Model files (keep in models directory)
+*.pkl
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
+Thumbs.db
 
-# Keep model files for faster deployment
-# (Remove these lines if model > 100MB)
-# *.pkl
+# Logs
+*.log
 
-.streamlit/secrets.toml
+# Environment
+.env
+.env.local
