@@ -31,7 +31,9 @@ print("=" * 80)
 # STEP 1: GENERATE SYNTHETIC DATA
 print("\n[1] Generating synthetic patient data...")
 
-n_samples = 1500
+# Get sample size from environment variable (default: 1500)
+n_samples = int(os.getenv('N_SAMPLES', 1500))
+print(f"Generating {n_samples} synthetic patient records...")
 
 # Generate numeric features
 age_at_diagnosis = np.random.uniform(5, 80, n_samples)

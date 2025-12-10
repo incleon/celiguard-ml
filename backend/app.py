@@ -13,11 +13,45 @@ import numpy as np
 from typing import List
 import os
 
+from contextlib import asynccontextmanager
+
+# LIFESPAN MANAGER (Replaces @app.on_event("startup"))
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Load the trained model and metadata when the API starts.
+    Clean up resources when the API shuts down.
+    """
+    try:
+        model_path = os.getenv('MODEL_PATH', '../models/celiac_risk_model.pkl')
+        metadata_path = os.getenv('METADATA_PATH', '../models/model_metadata.pkl')
+        
+        # Store in app.state instead of global variables
+        app.state.model = joblib.load(model_path)
+        app.state.metadata = joblib.load(metadata_path)
+        
+        print("✓ Model loaded successfully")
+        print(f"  Model type: {app.state.metadata['model_type']}")
+        print(f"  Accuracy: {app.state.metadata['accuracy']:.4f}")
+        
+    except Exception as e:
+        print(f"✗ Error loading model: {e}")
+        # We don't raise here to allow the app to start even if model fails
+        # Health check will report the failure
+        app.state.model = None
+        app.state.metadata = None
+        
+    yield
+    
+    # Cleanup (if needed)
+    app.state.model = None
+
 # INITIALIZE FASTAPI APP
 app = FastAPI(
-    title="Celiac Disease Malignancy Risk Stratifier API",
+    title="CeliGuard ML API",
     description="Predicts malignancy risk for Celiac Disease patients",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware to allow Streamlit frontend to call this API
@@ -28,27 +62,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# LOAD MODEL ON STARTUP
-model = None
-metadata = None
-
-@app.on_event("startup")
-async def load_model():
-    """Load the trained model and metadata when the API starts"""
-    global model, metadata
-    try:
-        model_path = os.getenv('MODEL_PATH', '../models/celiac_risk_model.pkl')
-        metadata_path = os.getenv('METADATA_PATH', '../models/model_metadata.pkl')
-        
-        model = joblib.load(model_path)
-        metadata = joblib.load(metadata_path)
-        print("✓ Model loaded successfully")
-        print(f"  Model type: {metadata['model_type']}")
-        print(f"  Accuracy: {metadata['accuracy']:.4f}")
-    except Exception as e:
-        print(f"✗ Error loading model: {e}")
-        raise
 
 
 # PYDANTIC MODELS FOR REQUEST/RESPONSE
@@ -69,7 +82,7 @@ class PatientInput(BaseModel):
     hla_risk: str = Field(..., description="HLA risk level (Low, Medium, High)")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "age_at_diagnosis": 45,
                 "current_age": 50,
@@ -185,26 +198,27 @@ async def root():
     }
 
 
+from fastapi import Request
+
 @app.get("/health")
-async def health_check():
+async def health_check(request: Request):
     """Health check endpoint"""
+    model_loaded = getattr(request.app.state, 'model', None) is not None
+    metadata = getattr(request.app.state, 'metadata', None)
+    
     return {
         "status": "ok",
-        "model_loaded": model is not None,
+        "model_loaded": model_loaded,
         "model_type": metadata['model_type'] if metadata else None
     }
 
 
 @app.post("/predict", response_model=PredictionResponse)
-async def predict_risk(patient: PatientInput):
+async def predict_risk(patient: PatientInput, request: Request):
     """
     Predict malignancy risk for a Celiac Disease patient.
-    
-    Returns:
-    - risk_class: "Low", "Moderate", or "High"
-    - risk_score: probability distribution across all classes
-    - message: human-readable explanation
     """
+    model = getattr(request.app.state, 'model', None)
     
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
@@ -240,8 +254,11 @@ async def predict_risk(patient: PatientInput):
 
 
 @app.get("/model-info")
-async def model_info():
+async def model_info(request: Request):
     """Get information about the loaded model"""
+    model = getattr(request.app.state, 'model', None)
+    metadata = getattr(request.app.state, 'metadata', None)
+    
     if model is None or metadata is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     
