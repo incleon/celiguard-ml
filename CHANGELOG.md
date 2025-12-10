@@ -58,6 +58,25 @@ All notable changes to the CeliGuard ML project will be documented in this file.
 - Models stored in `./models` directory
 - All services connected via `celiguard-network`
 
+## [2.1.0] - 2025-12-10
+
+### 🛡️ Robustness & Modernization
+
+#### Added
+- **Smart Training**: Training service now checks for existing models and exits if found (saves resources)
+- **Force Retrain**: Added `FORCE_TRAIN` environment variable to override smart training
+- **Configurable Dataset**: Added `N_SAMPLES` environment variable to control training data size
+- **Service Dependencies**: Frontend now waits for Backend to be *healthy* (not just started)
+
+#### Changed
+- **Backend Architecture**: Migrated from deprecated `@app.on_event` to modern `lifespan` context manager
+- **State Management**: Moved from global variables to `app.state` for better thread safety
+- **Entrypoints**: Added smart entrypoint script for training container
+
+#### Fixed
+- **Race Conditions**: Prevented frontend from starting before model is fully loaded
+- **Deprecation Warnings**: Resolved Pydantic V2 and Scikit-learn version warnings
+
 ---
 
 ## [1.0.0] - Previous Version

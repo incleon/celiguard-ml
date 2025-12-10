@@ -6,8 +6,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy training script
+# Copy training script and entrypoint
 COPY train_model.py .
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
-# Run the training script
-CMD ["python", "train_model.py"]
+# Run the entrypoint script
+CMD ["./entrypoint.sh"]

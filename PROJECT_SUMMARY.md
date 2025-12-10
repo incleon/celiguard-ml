@@ -43,16 +43,19 @@ celiguard-ml/
 ├── 📖 README.md                   # Main project documentation
 ├── 📖 QUICKSTART.md              # Quick start guide
 ├── 📖 ARCHITECTURE.md            # System architecture details
-├── 📖 CHANGELOG.md               # Version history
-│
-└── 📁 Legacy Files (can be removed)
-    ├── api.py                     # Old backend (replaced by backend/app.py)
-    ├── frontend.py                # Old frontend (replaced by frontend/app.py)
-    ├── data_and_model.py         # Old training (replaced by train/train_model.py)
-    ├── requirements.txt           # Old deps (split into service-specific)
-    ├── start.sh                   # Old startup script
-    └── render_start.sh           # Old Render deployment script
+└── 📖 CHANGELOG.md               # Version history
 ```
+
+## 🚀 Deployment Status
+
+- **Platform**: Google Compute Engine (GCE)
+- **Instance**: e2-micro (Free Tier)
+- **OS**: Ubuntu 22.04 LTS
+- **Method**: Docker Compose
+- **Security**: HTTPS via Caddy Reverse Proxy
+- **Domains**:
+  - Frontend: `https://celi.ayushyadav.live`
+  - Backend: `https://api.celi.ayushyadav.live`
 
 ## 🎯 Key Improvements
 
@@ -169,14 +172,7 @@ See `.env.example` for all options.
    - Check backend: http://localhost:8000/health
    - Check API docs: http://localhost:8000/docs
 
-3. **Clean Up Legacy Files** (optional)
-   ```bash
-   # After verifying everything works
-   rm api.py frontend.py data_and_model.py
-   rm requirements.txt start.sh render_start.sh
-   ```
-
-4. **Update Git Repository**
+3. **Update Git Repository**
    ```bash
    git add .
    git commit -m "Restructure project with Docker support"

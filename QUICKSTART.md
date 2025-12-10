@@ -42,6 +42,22 @@ Open your browser and navigate to:
 docker-compose down
 ```
 
+## Advanced Configuration
+
+### Force Retraining
+By default, the training service skips if a model exists. To force retraining:
+
+```bash
+FORCE_TRAIN=true docker-compose up -d --build train
+```
+
+### Configure Dataset Size
+To train on a larger dataset (e.g., 10,000 samples):
+
+```bash
+N_SAMPLES=10000 docker-compose up -d --build train
+```
+
 ## Option 2: Using Makefile
 
 If you have `make` installed:
